@@ -3,7 +3,7 @@ import { Stack, Divider, Drawer, DrawerProps, FormControlLabel, Switch, Tooltip 
 import { AppIconButton } from '../../components';
 import { useAppStore } from '../../store/AppStore';
 import { LinkToPage } from '../../utils/type';
-import { useEventLogout, useEventSwitchDarkMode, useIsAuthenticated, useOnMobile } from '../../hooks';
+import { useCurrentUser, useEventLogout, useEventSwitchDarkMode, useIsAuthenticated, useOnMobile } from '../../hooks';
 import SideBarNavList from './SideBarNavList';
 import { SIDEBAR_WIDTH, TOPBAR_DESKTOP_HEIGHT } from '../config';
 import UserInfo from '../../components/UserInfo';
@@ -23,8 +23,8 @@ interface Props extends Pick<DrawerProps, 'anchor' | 'className' | 'open' | 'var
  */
 const SideBar: FunctionComponent<Props> = ({ anchor, open, variant, items, onClose, ...restOfProps }) => {
   const [state] = useAppStore();
-  // const isAuthenticated = state.isAuthenticated; // Variant 1
-  const isAuthenticated = useIsAuthenticated(); // Variant 2
+  const isAuthenticated = useIsAuthenticated();
+  const currentUser = useCurrentUser();
   const onMobile = useOnMobile();
 
   const onSwitchDarkMode = useEventSwitchDarkMode();
@@ -63,7 +63,7 @@ const SideBar: FunctionComponent<Props> = ({ anchor, open, variant, items, onClo
       >
         {isAuthenticated && (
           <>
-            <UserInfo showAvatar />
+            <UserInfo showAvatar user={currentUser}/>
             <Divider />
           </>
         )}

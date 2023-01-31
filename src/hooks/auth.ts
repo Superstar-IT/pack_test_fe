@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useAppStore } from '../store';
+import { sessionStorageDelete, sessionStorageGet } from '../utils';
 
 /**
  * Hook to detect is current user authenticated or not
@@ -10,7 +11,18 @@ export function useIsAuthenticated() {
   let result = state.isAuthenticated;
 
   // TODO: AUTH: add access token verification or other authentication check here
-  // result = Boolean(sessionStorageGet('access_token', ''));
+  result = Boolean(sessionStorageGet('access_token', ''));
+
+  return result;
+}
+
+/**
+ * Hook to detect is current user authenticated or not
+ * @returns {User} current user or undefined
+ */
+export function useCurrentUser() {
+  const [state] = useAppStore();
+  let result = state.currentUser;
 
   return result;
 }
@@ -24,8 +36,7 @@ export function useEventLogout() {
 
   return useCallback(() => {
     // TODO: AUTH: add auth and tokens cleanup here
-    // sessionStorageDelete('access_token');
-
+    sessionStorageDelete('access_token');
     dispatch({ type: 'LOG_OUT' });
   }, [dispatch]);
 }

@@ -1,9 +1,12 @@
 import { SyntheticEvent, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Grid, TextField, Card, CardHeader, CardContent, InputAdornment } from '@mui/material';
+import { TextField, Card, CardHeader, CardContent, InputAdornment, Grid } from '@mui/material';
 import { useAppStore } from '../../../store';
-import { AppButton, AppLink, AppIconButton, AppAlert, AppForm } from '../../../components';
+import { AppButton, AppIconButton, AppAlert, AppForm } from '../../../components';
 import { useAppForm, SHARED_CONTROL_PROPS, eventPreventDefault } from '../../../utils/form';
+import AuthService from '../../../services/auth.service';
+import { sessionStorageSet } from '../../../utils';
+import { Action_Types } from '../../../store/AppActions';
 
 const VALIDATE_FORM_LOGIN_EMAIL = {
   email: {
@@ -13,7 +16,7 @@ const VALIDATE_FORM_LOGIN_EMAIL = {
   password: {
     presence: true,
     length: {
-      minimum: 8,
+      minimum: 6,
       maximum: 32,
       message: 'must be between 8 and 32 characters',
     },
@@ -48,16 +51,26 @@ const LoginEmailView = () => {
     async (event: SyntheticEvent) => {
       event.preventDefault();
 
-      const result = true; // await api.auth.loginWithEmail(values);
+      const result = await AuthService.emailLogin(values)
+        .then((resp) => {
+          sessionStorageSet('access_token', resp.token);
+          return resp.user;
+        })
+        .catch((error) => {
+          setError(`Failed to login`);
+          return
+        });
+
       if (!result) {
         setError('Please check email and password');
         return;
       }
 
-      dispatch({ type: 'LOG_IN' });
+      dispatch({ type: Action_Types.LOG_IN });
+      dispatch({ type: Action_Types.CURRENT_USER, currentUser: result })
       navigate('/', { replace: true });
     },
-    [dispatch, /*values,*/ navigate]
+    [dispatch, values, navigate]
   );
 
   const handleCloseError = useCallback(() => setError(undefined), []);
@@ -110,9 +123,6 @@ const LoginEmailView = () => {
             <AppButton type="submit" disabled={!formState.isValid}>
               Login with Email
             </AppButton>
-            <Button variant="text" color="inherit" component={AppLink} to="/auth/recovery/password">
-              Forgot Password
-            </Button>
           </Grid>
         </CardContent>
       </Card>

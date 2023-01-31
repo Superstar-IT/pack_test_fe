@@ -1,8 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import { NotFoundView, UserView } from '../views';
-import AboutView from '../views/About';
-import { WelcomeView } from '../views/Welcome';
-
+import { AboutView, NotFoundView, UserView, WelcomeView } from '../views';
 /**
  * List of routes available only for authenticated users
  * Also renders the "Private Layout" composition

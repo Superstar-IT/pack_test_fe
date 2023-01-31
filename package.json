@@ -33,6 +33,7 @@
     "@emotion/styled": "latest",
     "@mui/icons-material": "latest",
     "@mui/material": "latest",
+    "axios": "^1.3.0",
     "date-fns": "latest",
     "react": "latest",
     "react-dom": "latest",

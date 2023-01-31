@@ -15,7 +15,7 @@ import TopBar from './TopBar';
 import SideBar from './SideBar';
 
 // TODO: change to your app name or other word
-const TITLE_PRIVATE = '_TITLE_ app'; // Title for pages after authentication
+const TITLE_PRIVATE = 'Pack Test'; // Title for pages after authentication
 
 /**
  * SideBar navigation items with links
@@ -31,16 +31,6 @@ const SIDEBAR_ITEMS: Array<LinkToPage> = [
     path: '/user',
     icon: 'account',
   },
-  {
-    title: 'About',
-    path: '/about',
-    icon: 'info',
-  },
-  // {
-  //   title: 'Dev Tools',
-  //   path: '/dev',
-  //   icon: 'settings',
-  // },
 ];
 
 /**

@@ -9,12 +9,7 @@ import { AppLink } from '../../components';
 const WelcomeView = () => {
   return (
     <Stack direction="column" spacing={2}>
-      <Typography variant="h4">Welcome to React App with MUI</Typography>
-
-      <div>This is Welcome page, put your content here....</div>
-      <div>
-        Take a look on samples of components at <AppLink to="/about">About Page</AppLink>
-      </div>
+      <Typography variant="h4">Home Screen</Typography>
     </Stack>
   );
 };

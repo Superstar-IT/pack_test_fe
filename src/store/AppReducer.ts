@@ -1,4 +1,5 @@
 import { localStorageSet } from '../utils/localStorage';
+import { Action_Types } from './AppActions';
 import { AppStoreState } from './AppStore';
 
 /**
@@ -10,24 +11,24 @@ import { AppStoreState } from './AppStore';
 const AppReducer: React.Reducer<AppStoreState, any> = (state, action) => {
   // console.log('AppReducer() - action:', action);
   switch (action.type || action.action) {
-    case 'CURRENT_USER':
+    case Action_Types.CURRENT_USER:
       return {
         ...state,
         currentUser: action?.currentUser || action?.payload,
       };
-    case 'SIGN_UP':
-    case 'LOG_IN':
+    case Action_Types.SIGN_UP:
+    case Action_Types.LOG_IN:
       return {
         ...state,
         isAuthenticated: true,
       };
-    case 'LOG_OUT':
+    case Action_Types.LOG_OUT:
       return {
         ...state,
         isAuthenticated: false,
         currentUser: undefined, // Also reset previous user data
       };
-    case 'DARK_MODE': {
+    case Action_Types.DARK_MODE: {
       const darkMode = action?.darkMode ?? action?.payload;
       localStorageSet('darkMode', darkMode);
       return {

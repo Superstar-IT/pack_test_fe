@@ -5,3 +5,4 @@ export * from './navigation';
 export * from './sessionStorage';
 export * from './type';
 export * from './utils';
+export * from './httpClient';

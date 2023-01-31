@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useAppStore } from '../store';
+import { Action_Types } from '../store/AppActions';
 
 /**
  * Returns event handler to toggle Dark/Light modes
@@ -10,7 +11,7 @@ export function useEventSwitchDarkMode() {
 
   return useCallback(() => {
     dispatch({
-      type: 'DARK_MODE',
+      type: Action_Types.DARK_MODE,
       payload: !state.darkMode,
     });
   }, [state, dispatch]);

@@ -1,10 +1,11 @@
 import { Avatar, Stack, Typography } from '@mui/material';
+import { User } from '../../utils';
 import AppLink from '../AppLink';
 
 interface UserInfoProps {
   className?: string;
   showAvatar?: boolean;
-  user?: any;
+  user?: User;
 }
 
 /**
@@ -15,9 +16,9 @@ interface UserInfoProps {
  * @param {object} [user] - logged user data {name, email, avatar...}
  */
 const UserInfo = ({ className, showAvatar = false, user, ...restOfProps }: UserInfoProps) => {
-  const fullName = user?.name || [user?.nameFirst || '', user?.nameLast || ''].join(' ').trim();
-  const srcAvatar = user?.avatar ? user?.avatar : undefined;
-  const userPhoneOrEmail = user?.phone || (user?.email as string);
+  const fullName = [user?.firstName || '', user?.lastName || ''].join(' ').trim();
+  const srcAvatar = user?.photo ? user?.photo.path : undefined;
+  const userPhoneOrEmail = user?.email || '';
 
   return (
     <Stack alignItems="center" minHeight="fit-content" marginBottom={2} {...restOfProps}>

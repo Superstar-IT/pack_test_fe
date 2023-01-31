@@ -10,6 +10,7 @@ import {
 import useMediaQuery from '@mui/material/useMediaQuery';
 import AppReducer from './AppReducer';
 import { localStorageGet } from '../utils/localStorage';
+import { User } from '../utils';
 
 /**
  * AppState structure and initial values
@@ -17,7 +18,7 @@ import { localStorageGet } from '../utils/localStorage';
 export interface AppStoreState {
   darkMode: boolean;
   isAuthenticated: boolean;
-  currentUser?: object | undefined;
+  currentUser?: User | undefined;
 }
 const INITIAL_APP_STATE: AppStoreState = {
   darkMode: false, // Overridden by useMediaQuery('(prefers-color-scheme: dark)') in AppStore
