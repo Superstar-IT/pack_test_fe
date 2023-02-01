@@ -1,4 +1,5 @@
-import { httpClient, User, UserUpdateRequest } from '../utils';
+import { User } from '../utils';
+import httpClient from '../utils/httpClient';
 
 export type LoginRequest = {
   email: string;
@@ -23,10 +24,6 @@ export const AuthService = {
 
   getMyInfo: async (): Promise<User> => {
     return await httpClient.get('/auth/me').then((response) => response.data);
-  },
-
-  updateMyInfo: async (updateData: UserUpdateRequest): Promise<User> => {
-    return await httpClient.post(`/auth/me`, updateData).then((response) => response.data);
   },
 };
 

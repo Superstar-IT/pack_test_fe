@@ -1,4 +1,4 @@
-import { httpClient } from '../utils';
+import httpClient from '../utils/httpClient';
 
 export type FileUploadResponse = {
   path: string;

@@ -1,40 +1,32 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import PublicRoutes from './PublicRoutes';
 import PrivateRoutes from './PrivateRoutes';
-import { useIsAuthenticated } from '../hooks/auth';
-// import { isUserStillLoggedIn } from '../api/auth/utils';
-// import { api } from '../api';
+import { useCurrentUser, useIsAuthenticated } from '../hooks/auth';
+import { useAppStore } from '../store';
+import AuthService from '../services/auth.service';
+import { Action_Types } from '../store/AppActions';
 
 /**
  * Renders routes depending on Authenticated or Anonymous users
  */
 const Routes = () => {
-  // const [state, dispatch] = useAppStore();
-  // const isAuthenticated = state.isAuthenticated; // Variant 1
+  const [, dispatch] = useAppStore();
+  const navigation = useNavigate();
   const isAuthenticated = useIsAuthenticated(); // Variant 2
+  const currentUser = useCurrentUser();
 
-  // Re-login or logout the user if needed
-  // useEffect(() => {
-  //   // Check isn't token expired?
-  //   const isLogged = isUserStillLoggedIn();
-
-  //   if (isAuthenticated && !isLogged) {
-  //     // Token was expired, logout immediately!
-  //     console.warn('Token was expired, logout immediately!');
-  //     api?.auth?.logout();
-  //     // dispatch({ type: 'LOG_OUT' }); // Not needed due to reloading App in api.auth.logout()
-  //     return; // Thats all for now, the App will be completely re-rendered soon
-  //   }
-
-  //   if (isLogged && !isAuthenticated) {
-  //     // Valid token is present but we are not logged in somehow, lets fix it
-  //     console.warn('Token found, lets try to auto login');
-  //     api?.auth?.refresh().then(() => {
-  //       dispatch({ type: 'LOG_IN' }); // Update global store only if token refresh was successful.
-  //     });
-  //   }
-  // }, [isAuthenticated, dispatch]); // Effect for every isAuthenticated change actually
-
-  console.log('Routes() - isAuthenticated:', isAuthenticated);
+  useEffect(() => {
+    if (isAuthenticated && !currentUser) {
+      AuthService.getMyInfo()
+        .then((user) => dispatch({ type: Action_Types.CURRENT_USER, currentUser: user }))
+        .catch(() => {
+          dispatch({ type: Action_Types.LOG_OUT });
+          navigation('/auth/login')
+        });
+    }
+  }, [isAuthenticated, currentUser, dispatch, navigation]);
 
   return isAuthenticated ? <PrivateRoutes /> : <PublicRoutes />;
 };

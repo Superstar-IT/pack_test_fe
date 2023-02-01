@@ -1,5 +1,9 @@
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import jwtDecode from 'jwt-decode';
+
 import { useAppStore } from '../store';
+import { Action_Types } from '../store/AppActions';
 import { sessionStorageDelete, sessionStorageGet } from '../utils';
 
 /**
@@ -11,9 +15,13 @@ export function useIsAuthenticated() {
   let result = state.isAuthenticated;
 
   // TODO: AUTH: add access token verification or other authentication check here
-  result = Boolean(sessionStorageGet('access_token', ''));
-
-  return result;
+  const token = sessionStorageGet('access_token', '');
+  try {
+    const decodedToken = jwtDecode(token);
+    return result || Boolean(decodedToken);
+  } catch (error) {
+    return false;
+  }
 }
 
 /**
@@ -33,10 +41,12 @@ export function useCurrentUser() {
  */
 export function useEventLogout() {
   const [, dispatch] = useAppStore();
+  const navigate = useNavigate();
 
   return useCallback(() => {
     // TODO: AUTH: add auth and tokens cleanup here
     sessionStorageDelete('access_token');
-    dispatch({ type: 'LOG_OUT' });
-  }, [dispatch]);
+    dispatch({ type: Action_Types.LOG_OUT });
+    navigate('/auth/login');
+  }, [dispatch, navigate]);
 }

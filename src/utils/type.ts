@@ -26,5 +26,4 @@ export type UserUpdateRequest = {
   firstName?: string;
   lastName?: string;
   password?: string;
-  oldPassword: string;
 };

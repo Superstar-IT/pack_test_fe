@@ -1,51 +1,138 @@
-import { Card, CardActions, CardContent, CardHeader, Divider, Grid, Typography } from '@mui/material';
-import { AppButton, AppLink, AppIconButton } from '../../components';
-import DialogsSection from './DialogsSection';
+import { useCallback, useMemo, useState } from 'react';
+import { Box, Card, CardContent, CardHeader, FormControl, Grid, TextField } from '@mui/material';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
+import { AppButton, AppForm, AppAlert } from '../../components';
+import { useAppStore } from '../../store';
+import { UserUpdateRequest } from '../../utils';
+import { FileUploadResponse } from '../../services/file.service';
+import UserService from '../../services/user.service';
+import { Action_Types } from '../../store/AppActions';
 
 /**
- * Renders "About" view
- * url: /about
+ * Renders "User" view
+ * url: /user
  */
+
+const Profile_Update_Schema = yup.object({
+  firstName: yup.string().trim().required('FirstName required'),
+  lastName: yup.string().trim().required('LastName required'),
+  password: yup
+    .string()
+    .optional()
+    .test('len', 'Password must be between 8 and 32 characters', (val) => {
+      return val ? val.length > 7 && val.length < 33 : true;
+    }),
+});
+
 const UserView = () => {
+  const [state, dispatch] = useAppStore();
+  const user = useMemo(() => state?.currentUser, [state]);
+  const [photo, setPhoto] = useState<FileUploadResponse | undefined>(undefined);
+
+  const profileForm = useFormik({
+    initialValues: {
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      password: '',
+    },
+    enableReinitialize: true,
+    validationSchema: Profile_Update_Schema,
+    onSubmit: async (values, actions) => {
+      actions.setSubmitting(true);
+      const { firstName, lastName, password } = values;
+      if (Boolean(password) || firstName !== user?.firstName || lastName !== user.lastName || Boolean(photo)) {
+        const updatedProfile: UserUpdateRequest = {
+          password: Boolean(password) ? password : undefined,
+        };
+        if (firstName !== user?.firstName) updatedProfile.firstName = firstName;
+        if (lastName !== user?.lastName) updatedProfile.lastName = lastName;
+        if (Boolean(photo)) updatedProfile.photo = photo;
+
+        if (user?.id) {
+          await UserService.updateUser(user.id, updatedProfile)
+            .then(() => dispatch({ type: Action_Types.CURRENT_USER, currentUser: { ...user, ...updatedProfile } }))
+            .catch((error) => {
+              setError(`Failed to update profile`);
+            });
+        }
+      }
+      actions.setSubmitting(false);
+    },
+  });
+
+  const { isValid, errors, values, touched, handleChange, handleSubmit } = profileForm;
+
+  const [error, setError] = useState<string>();
+
+  const handleCloseError = useCallback(() => setError(undefined), []);
+
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} md={3}>
-        <DialogsSection />
-      </Grid>
-
       <Grid item xs={12}>
         <Card>
+          <CardHeader>Profile</CardHeader>
           <CardContent>
-            <Typography variant="h1">MUI Typo h1</Typography>
-            <Typography variant="h2">MUI Typography h2</Typography>
-            <Typography variant="h3">MUI Typography h3</Typography>
-            <Typography variant="h4">MUI Typography h4</Typography>
-            <Typography variant="h5">MUI Typography h5</Typography>
-            <Typography variant="h6">MUI Typography h6</Typography>
-            <Divider />
-            <Typography variant="subtitle1">MUI Typography subtitle1</Typography>
-            <Typography variant="subtitle2">MUI Typography subtitle2</Typography>
-            <Typography variant="caption">MUI Typography caption</Typography>
-            <Divider />
-            <Typography variant="body1">
-              MUI Typography body1 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-              laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit
-              esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
-              qui officia deserunt mollit anim id est laborum.
-            </Typography>
-            <Divider />
-            <Typography variant="body2">
-              MUI Typography body2 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-              laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit
-              esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
-              qui officia deserunt mollit anim id est laborum.
-            </Typography>
-            <Divider />
-            <Typography variant="overline">MUI Typography overline</Typography>
-            <Divider />
-            <Typography variant="button">MUI Typography button</Typography>
+            <AppForm onSubmit={handleSubmit}>
+              <FormControl fullWidth margin="dense">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: 2,
+                  }}
+                >
+                  <TextField
+                    id="firstname-input"
+                    label="First Name"
+                    name="firstName"
+                    value={values.firstName}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    error={Boolean(errors.firstName)}
+                    helperText={errors.firstName}
+                  />
+                  <TextField
+                    id="lastname-input"
+                    label="Last Name"
+                    name="lastName"
+                    value={values.lastName}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    error={Boolean(errors.lastName)}
+                    helperText={errors.lastName}
+                  />
+                </Box>
+              </FormControl>
+              <FormControl fullWidth margin="dense">
+                <TextField fullWidth value={user?.email || ''} disabled placeholder="user@email.com" />
+              </FormControl>
+              <FormControl fullWidth margin="dense">
+                <TextField
+                  fullWidth
+                  type="password"
+                  value={values.password}
+                  placeholder="Password"
+                  name="password"
+                  id="password-input"
+                  label="New Password"
+                  onChange={handleChange}
+                  error={touched.password && Boolean(errors.password)}
+                  helperText={touched.password && errors.password}
+                />
+              </FormControl>
+              {error ? (
+                <AppAlert severity="error" onClose={handleCloseError}>
+                  {error}
+                </AppAlert>
+              ) : null}
+              <Grid container justifyContent="center" alignItems="center">
+                <AppButton type="submit" disabled={!isValid} color="primary">
+                  Save Change
+                </AppButton>
+              </Grid>
+            </AppForm>
           </CardContent>
         </Card>
       </Grid>
