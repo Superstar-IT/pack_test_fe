@@ -5,9 +5,10 @@ import * as yup from 'yup';
 import { AppButton, AppForm, AppAlert } from '../../components';
 import { useAppStore } from '../../store';
 import { UserUpdateRequest } from '../../utils';
-import { FileUploadResponse } from '../../services/file.service';
+import FileService, { FileUploadResponse } from '../../services/file.service';
 import UserService from '../../services/user.service';
 import { Action_Types } from '../../store/AppActions';
+import AppAvatar from '../../components/AppAvatar';
 
 /**
  * Renders "User" view
@@ -65,7 +66,21 @@ const UserView = () => {
 
   const [error, setError] = useState<string>();
 
-  const handleCloseError = useCallback(() => setError(undefined), []);
+  const handleCloseError = useCallback(() => setError(undefined), [setError]);
+  const handleChangePhoto = useCallback(
+    (file: File | null) => {
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        FileService.upload(formData)
+          .then((res) => setPhoto(res))
+          .catch((error) => {
+            setError(`Failed to upload image`);
+          });
+      }
+    },
+    [setPhoto]
+  );
 
   return (
     <Grid container spacing={2}>
@@ -74,6 +89,14 @@ const UserView = () => {
           <CardHeader>Profile</CardHeader>
           <CardContent>
             <AppForm onSubmit={handleSubmit}>
+              <Grid container direction="row" alignItems="cen" justifyContent={'center'} mb={4}>
+                <AppAvatar
+                  onChange={handleChangePhoto}
+                  src={photo ? photo.path : user?.photo.path || ''}
+                  sx={{ width: 128, height: 128 }}
+                  editable
+                />
+              </Grid>
               <FormControl fullWidth margin="dense">
                 <Box
                   sx={{
